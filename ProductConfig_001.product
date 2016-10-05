@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product name="P110" uid="P110" id="P110.product" application="org.eclipse.rap.demo.application" useFeatures="false" includeLaunchers="true">
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
+      </vmArgsMac>
+   </launcherArgs>
+
+   <launcher>
+      <solaris/>
+      <win useIco="false">
+         <bmp/>
+      </win>
+   </launcher>
+
+   <vm>
+   </vm>
+
+   <plugins>
+      <plugin id="P110"/>
+      <plugin id="javax.servlet"/>
+      <plugin id="org.eclipse.osgi"/>
+      <plugin id="org.eclipse.rap.rwt"/>
+   </plugins>
+
+
+</product>
