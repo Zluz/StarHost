@@ -68,6 +68,8 @@ public class UserInterfaceRemote extends UserInterface {
 	
 	private void thread_run() {
 
+		//TODO compare current time to last-fired. skip if within PERIOD.
+		
 		final String strTime = DATE_FORMAT.format( new Date() );
 		
 		display.syncExec( new Runnable() {
@@ -76,6 +78,7 @@ public class UserInterfaceRemote extends UserInterface {
 				lblTime.setText( strTime );
 			}
 		});
+		//TODO record last-fired here.
 	}
 	
 	private Thread createUpdateTimeThread() {
