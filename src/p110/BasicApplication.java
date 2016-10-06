@@ -12,6 +12,10 @@ import jmr.home.rap.HomeEntryPoint;
 
 public class BasicApplication implements ApplicationConfiguration {
 
+	static {
+		System.out.println( BasicApplication.class.toString() + " loaded." );
+	}
+	
     public void configure( final Application application ) {
         Map<String, String> properties = new HashMap<String, String>();
         properties.put(WebClient.PAGE_TITLE, "Hello RAP");

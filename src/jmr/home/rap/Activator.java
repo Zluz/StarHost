@@ -5,6 +5,10 @@ import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 
+	static {
+		System.out.println( Activator.class.toString() + " loaded." );
+	}
+	
 	static BundleContext bundlecontext = null;
 	
 	@Override

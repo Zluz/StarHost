@@ -18,9 +18,14 @@ import org.eclipse.swt.widgets.Text;
 
 public class UserInterface {
 
+	static {
+		System.out.println( UserInterface.class.toString() + " loaded." );
+	}
+	
 	
 	protected Display display;
 	protected Label lblTime;
+	protected Text txtInfo;
 
 
 	
@@ -329,7 +334,7 @@ public class UserInterface {
 	        strbuf.append( "\tgetMessage: " + t.getMessage() + CR );
         }
         
-        final Text txtInfo = new Text( compCenter, SWT.MULTI | SWT.BORDER );
+        txtInfo = new Text( compCenter, SWT.MULTI | SWT.BORDER );
         txtInfo.setText( strbuf.toString() );
 		final GridData gdFill = new GridData( SWT.FILL, SWT.FILL, true, true );
 //		gdFill.grabExcessHorizontalSpace = true;

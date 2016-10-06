@@ -20,10 +20,14 @@ import p110.UpdatingControls;
 
 public class HomeEntryPoint extends AbstractEntryPoint {
 
+	static {
+		System.out.println( HomeEntryPoint.class.toString() + " loaded." );
+	}
+	
 	private static final long serialVersionUID = 1L;
 
 	public HomeEntryPoint() {
-		System.out.println( "--- homeEntryPoint.(ctor)" );
+		System.out.println( "--- homeEntryPoint.(ctor) (StarHost)" );
 	}
 	
 	public static void buildUI(	final Composite parent,

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="P110" uid="P110" id="P110.product" application="org.eclipse.rap.demo.application" useFeatures="false" includeLaunchers="true">
+<product name="StarHost" uid="StarHost" id="P110.product" application="org.eclipse.rap.demo.application" useFeatures="false" includeLaunchers="true">
 
    <configIni use="default">
    </configIni>

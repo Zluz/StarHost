@@ -2,29 +2,118 @@ package jmr.home.rap;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.service.ServerPushSession;
+import org.eclipse.rap.rwt.service.UISession;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Text;
 
 public class UserInterfaceRemote extends UserInterface {
 
-//	private static final String DATE_PATTERN = "h:mm a";
+
+	//	private static final String DATE_PATTERN = "h:mm a";
 	private static final String DATE_PATTERN = "h:mm:ss a";
 
 	private final ServerPushSession sps;
 	
-//	private final static long PERIOD = 1000 * 60;
-	private final static long PERIOD = 1000 * 10;
+	private final static StringBuffer strbufLog = new StringBuffer();
+	
+	private final static List<UserInterfaceRemote> 
+									listInstances = new LinkedList<>();
 
+
+	/*
+	 * PERIOD must be more than MAX_LATENCY
+	 */
+	
+//	private static final long PERIOD = 1000L * 60;
+	private static final long PERIOD = 1000L * 10;
+	
+	private static final long MAX_LATENCY = 1000L * 2;
+
+	private long lLastUpdate = 0;
+	
+	
 	private final static SimpleDateFormat 
 			DATE_FORMAT = new SimpleDateFormat( DATE_PATTERN );
+
+//	private final HttpServletRequest request;
+//	private final UISession session;
 
 
 	public UserInterfaceRemote() {
 	    sps = new ServerPushSession();
+	    listInstances.add( this );
+	    
+	    UserInterfaceRemote.log( "New session: " + this );
+	    
+
+//        request = RWT.getRequest();
+//        session = RWT.getUISession();
+//
+//        UserInterfaceRemote.log( "RWT RemoteHost: " + request.getRemoteHost() );
+//        UserInterfaceRemote.log( "RWT URI: " + request.getRequestURI() );
+//        UserInterfaceRemote.log( "RWT UI ID: " + session.getId() );
 	}
+	
+	
+	public static void refreshInstances() {
+		final Set<UserInterfaceRemote> setToDelete = new HashSet<>();
+		for ( final UserInterfaceRemote uir : listInstances ) {
+			if ( null!=uir.display && uir.display.isDisposed() ) {
+				setToDelete.add( uir );
+			}
+		}
+		for ( final UserInterfaceRemote uir : setToDelete ) {
+			setToDelete.remove( uir );
+		}
+	}
+	
+	
+	public static void log( final String strMessage ) {
+		strbufLog.append( "\n" );
+		strbufLog.append( strMessage );
+		
+		System.out.println( "log> " + strMessage );
+		
+		String strLog = strbufLog.toString();
+		int iPos = strLog.length() - 2048;
+		if ( iPos>0 ) {
+			iPos = strLog.lastIndexOf( "\n", iPos );
+			if ( iPos>0 ) {
+				strLog = strLog.substring( iPos );
+			}
+		}
+		strLog.replaceAll( "\\n", Text.DELIMITER );
+		
+		refreshInstances();
+		
+		final String strText = strLog;
+		for ( final UserInterfaceRemote uir : listInstances ) {
+			if ( null!=uir.display ) {
+				uir.display.syncExec( new Runnable() {
+					@Override
+					public void run() {
+						System.out.println( "[send] set log text" );
+						uir.txtInfo.setText( strText );
+					}
+				});
+			}
+		}
+		
+		
+	}
+	
+	
 	
 	public void setTime( final String strTime ) {
 		if ( null==display ) return;
@@ -43,9 +132,6 @@ public class UserInterfaceRemote extends UserInterface {
 	public void buildUI( final Composite parent ) {
 		super.buildUI( parent, true );
 		sps.start();
-		
-//		Thread threadUpdateTime = createUpdateTimeThread();
-//		threadUpdateTime.start();
 		startTimerTaskTimeThread();
 	}
 
@@ -66,48 +152,33 @@ public class UserInterfaceRemote extends UserInterface {
 		timer.scheduleAtFixedRate( task, new Date( dateFirst ), PERIOD );
 	}
 	
+	
 	private void thread_run() {
 
-		//TODO compare current time to last-fired. skip if within PERIOD.
+		final long lNowCheck = System.currentTimeMillis();
+		final long lElapsed = lNowCheck - lLastUpdate + MAX_LATENCY;
 		
-		final String strTime = DATE_FORMAT.format( new Date() );
+		if ( lElapsed >= PERIOD ) {
 		
-		display.syncExec( new Runnable() {
-			@Override
-			public void run() {
-				lblTime.setText( strTime );
-			}
-		});
-		//TODO record last-fired here.
-	}
-	
-	private Thread createUpdateTimeThread() {
-		final Thread thread = new Thread( new Runnable() {
-			@Override
-			public void run() {
-				thread_run();
-				try {
-					
-					while ( !display.isDisposed() ) {
-						
-						thread_run();
-						
-						Thread.sleep( PERIOD );
-					}
-					
-				} catch ( final InterruptedException e ) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			final Long[] lNowUI = { null };
+			
+			display.syncExec( new Runnable() {
+				@Override
+				public void run() {
+					System.out.println( "[send] time update" );
+					lNowUI[0] = System.currentTimeMillis();
+					final Date date = new Date( lNowUI[0]);
+					final String strTime = DATE_FORMAT.format( date );
+					lblTime.setText( strTime );
 				}
-			}
-		});
-		thread.setDaemon( true );
-		return thread;
+			});
+			
+			lLastUpdate = lNowUI[0];
+		} else {
+			// skip this update
+			System.out.println( "(time update skipped)  "
+					+ "PERIOD = " + PERIOD + ", lElapsed = " + lElapsed );
+		}
 	}
-	
-	
-	
-	
-	
 	
 }
