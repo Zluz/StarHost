@@ -9,21 +9,28 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.eclipse.rap.rwt.RWT;
 import org.eclipse.rap.rwt.service.ServerPushSession;
-import org.eclipse.rap.rwt.service.UISession;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 
-public class UserInterfaceRemote extends UserInterface {
+//import jmr.home.model.Atom;
+//import jmr.home.model.IAtomConsumer;
 
+public class UserInterfaceRemote 
+					extends UserInterface 
+//					implements IAtomConsumer 
+					{
+
+	static {
+		System.out.println( UserInterfaceRemote.class.toString() + " loaded." );
+	}
+	
 
 	//	private static final String DATE_PATTERN = "h:mm a";
 	private static final String DATE_PATTERN = "h:mm:ss a";
 
-	private final ServerPushSession sps;
+	private final ServerPushSession spsClock;
+	private final ServerPushSession spsControls;
 	
 	private final static StringBuffer strbufLog = new StringBuffer();
 	
@@ -38,9 +45,11 @@ public class UserInterfaceRemote extends UserInterface {
 //	private static final long PERIOD = 1000L * 60;
 	private static final long PERIOD = 1000L * 10;
 	
-	private static final long MAX_LATENCY = 1000L * 2;
+//	private static final long MAX_LATENCY = 1000L * 2;
+	private static final long MAX_ALLOWABLE_DELAY = 1000L;
 
-	private long lLastUpdate = 0;
+	private long lClockLastUpdate = 0;
+	private long lControlsLastUpdate = 0;
 	
 	
 	private final static SimpleDateFormat 
@@ -51,7 +60,8 @@ public class UserInterfaceRemote extends UserInterface {
 
 
 	public UserInterfaceRemote() {
-	    sps = new ServerPushSession();
+	    spsClock = new ServerPushSession();
+	    spsControls = new ServerPushSession();
 	    listInstances.add( this );
 	    
 	    UserInterfaceRemote.log( "New session: " + this );
@@ -76,6 +86,21 @@ public class UserInterfaceRemote extends UserInterface {
 		for ( final UserInterfaceRemote uir : setToDelete ) {
 			setToDelete.remove( uir );
 		}
+	}
+	
+	
+	public static boolean processMessage( final String strMessage ) {
+		
+		System.out.println( "--- jmr.home.rap.UserInterfaceRemote.processMessage(String)" );
+		System.out.println( "\t" + strMessage );
+		
+		refreshInstances();
+
+		for ( final UserInterfaceRemote uir : listInstances ) {
+			uir.strPendingMessage = strMessage;
+		}
+		
+		return true;
 	}
 	
 	
@@ -109,32 +134,90 @@ public class UserInterfaceRemote extends UserInterface {
 				});
 			}
 		}
-		
-		
 	}
 	
 	
 	
-	public void setTime( final String strTime ) {
-		if ( null==display ) return;
-		if ( display.isDisposed() ) return;
-		if ( lblTime.isDisposed() ) return;
-		if ( null==strTime ) return;
-		
-		display.asyncExec( new Runnable() {
-			public void run() {
-				lblTime.setText( strTime );
-			};
-		});
-	}
+//	public void setTime( final String strTime ) {
+//		if ( null==display ) return;
+//		if ( display.isDisposed() ) return;
+//		if ( lblTime.isDisposed() ) return;
+//		if ( null==strTime ) return;
+//		
+//		display.asyncExec( new Runnable() {
+//			public void run() {
+//				lblTime.setText( strTime );
+//			};
+//		});
+//	}
 	
 	
 	public void buildUI( final Composite parent ) {
 		super.buildUI( parent, true );
-		sps.start();
+		
+		spsClock.start();
 		startTimerTaskTimeThread();
+		
+		spsControls.start();
+		startControlUpdateThread();
+		
+		this.lblText.setText( "Class: " + UserInterfaceRemote.class.getName() );
 	}
 
+	
+	
+	String strPendingMessage = null;
+	
+	
+//	@Override
+//	public void consume( final Atom atom ) {
+//		final String strInfo = atom.toString();
+//		strPendingMessage = strInfo;
+//	}
+	
+
+	
+	private void startControlUpdateThread() {
+		
+		final TimerTask task = new TimerTask() {
+			@Override
+			public void run() {
+
+				// create random message
+				if ( 1000 * Math.random() < 10 ) {
+					final long lTime = System.currentTimeMillis();
+					strPendingMessage = "Timer: " + lTime;
+				}
+				
+				
+				final long[] lNow = { System.currentTimeMillis() };
+				final long lElapsed = lNow[0] - lControlsLastUpdate;
+				if ( lElapsed >= MAX_ALLOWABLE_DELAY ) {
+					
+					if ( null!=strPendingMessage ) {
+	
+						display.syncExec( new Runnable() {
+							@Override
+							public void run() {
+	//							System.out.println( "[send] time update" );
+								
+								lblText.setText( strPendingMessage );
+								strPendingMessage = null;
+								lNow[0] = System.currentTimeMillis();
+							}
+						});
+						
+						lControlsLastUpdate = lNow[0];
+					}
+				}
+			}
+		};
+		
+		final Timer timer = new Timer();
+		
+		timer.scheduleAtFixedRate( task, 2000, 10 );
+	}
+	
 	
 	private void startTimerTaskTimeThread() {
 		
@@ -156,16 +239,18 @@ public class UserInterfaceRemote extends UserInterface {
 	private void thread_run() {
 
 		final long lNowCheck = System.currentTimeMillis();
-		final long lElapsed = lNowCheck - lLastUpdate + MAX_LATENCY;
+//		final long lElapsed = lNowCheck - lLastUpdate + MAX_LATENCY;
+		final long lElapsed = lNowCheck - lClockLastUpdate;
 		
-		if ( lElapsed >= PERIOD ) {
+//		if ( lElapsed >= PERIOD ) {
+		if ( lElapsed >= MAX_ALLOWABLE_DELAY ) {
 		
 			final Long[] lNowUI = { null };
 			
 			display.syncExec( new Runnable() {
 				@Override
 				public void run() {
-					System.out.println( "[send] time update" );
+//					System.out.println( "[send] time update" );
 					lNowUI[0] = System.currentTimeMillis();
 					final Date date = new Date( lNowUI[0]);
 					final String strTime = DATE_FORMAT.format( date );
@@ -173,12 +258,13 @@ public class UserInterfaceRemote extends UserInterface {
 				}
 			});
 			
-			lLastUpdate = lNowUI[0];
+			lClockLastUpdate = lNowUI[0];
 		} else {
 			// skip this update
 			System.out.println( "(time update skipped)  "
 					+ "PERIOD = " + PERIOD + ", lElapsed = " + lElapsed );
 		}
 	}
-	
+
+
 }

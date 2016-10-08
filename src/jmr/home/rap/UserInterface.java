@@ -26,6 +26,7 @@ public class UserInterface {
 	protected Display display;
 	protected Label lblTime;
 	protected Text txtInfo;
+	protected Label lblText;
 
 
 	
@@ -287,6 +288,12 @@ public class UserInterface {
         
         final Label lbl = new Label( compCenter, SWT.NONE );
         lbl.setText( "time: xxxxx" );
+        
+        lblText = new Label( compCenter, SWT.NONE );
+        lblText.setText( "Message" );
+        lblText.setLayoutData( new GridData( SWT.FILL, SWT.NONE, true, false ) );
+
+        
         
         
 //        final String[] strText = { "0" };

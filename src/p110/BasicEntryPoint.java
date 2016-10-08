@@ -14,6 +14,10 @@ import org.eclipse.swt.widgets.Text;
 @SuppressWarnings("serial")
 public class BasicEntryPoint extends AbstractEntryPoint {
 
+	static {
+		System.out.println( BasicEntryPoint.class.toString() + " loaded." );
+	}
+	
     @Override
     protected void createContents( final Composite parent ) {
         parent.setLayout(new GridLayout(2, false));

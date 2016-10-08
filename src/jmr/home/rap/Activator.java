@@ -3,6 +3,10 @@ package jmr.home.rap;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import jmr.home.comm.rmi.RMIMessageConsumer;
+
+//import jmr.home.apps.StarApp;
+
 public class Activator implements BundleActivator {
 
 	static {
@@ -15,6 +19,10 @@ public class Activator implements BundleActivator {
 	public void start( final BundleContext context ) throws Exception {
 		bundlecontext = context;
 		System.out.println( "BundleContext set: " + context );
+		
+//		new StarApp();
+		
+		new RMIMessageConsumer();
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-public class test {
+public class Test_SWT {
 
 	public static void main( final String[] args ) {
 

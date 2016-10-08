@@ -1,4 +1,6 @@
 package jmr.home.rap;
+import java.rmi.RemoteException;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.rap.rwt.RWT;
@@ -15,6 +17,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import jmr.home.comm.rmi.RMIMessageConsumer;
 import p110.ProgressBarTab;
 import p110.UpdatingControls;
 
@@ -28,6 +31,15 @@ public class HomeEntryPoint extends AbstractEntryPoint {
 
 	public HomeEntryPoint() {
 		System.out.println( "--- homeEntryPoint.(ctor) (StarHost)" );
+		
+//		RMIMessageConsumer.TEST.toString();
+//		
+//		try {
+//			new RMIMessageConsumer();
+//		} catch (RemoteException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 	
 	public static void buildUI(	final Composite parent,
