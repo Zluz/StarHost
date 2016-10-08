@@ -1,4 +1,4 @@
-package p110;
+package jmr.home.app.uirap;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,9 +8,8 @@ import org.eclipse.rap.rwt.application.ApplicationConfiguration;
 import org.eclipse.rap.rwt.client.WebClient;
 
 import jmr.home.api.comm.IConstants;
+import jmr.home.app.uirap.BasicEntryPoint;
 import jmr.home.comm.http.HttpAtomConsumer;
-import jmr.home.comm.rmi.ConfigureRMI;
-import jmr.home.comm.rmi.RMIMessageConsumer;
 import jmr.home.rap.HomeEntryPoint;
 
 
@@ -28,11 +27,20 @@ public class BasicApplication implements ApplicationConfiguration {
         application.addEntryPoint("/home", HomeEntryPoint.class, properties);
         
         System.out.println( "Configured host: " + IConstants.HOST__UI_RAP );
-        
-//        ConfigureRMI.initialize();
-        final HttpAtomConsumer httpServer = 
-        		new HttpAtomConsumer( IConstants.PORT__UI_RAP, 
-        						IConstants.HTTP_SERVICE__UI_RAP__SEND );
+
+        this.initializeComms();
+    }
+    
+    
+    private void initializeComms() {
+    	
+    	// RMI
+//      ConfigureRMI.initialize();
+    	
+    	// HTTP
+//      final HttpAtomConsumer httpServer = 
+      		new HttpAtomConsumer( IConstants.PORT__UI_RAP, 
+      						IConstants.HTTP_SERVICE__UI_RAP__SEND );
     }
 
 }

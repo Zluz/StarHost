@@ -1,5 +1,4 @@
 package jmr.home.rap;
-import java.rmi.RemoteException;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -17,9 +16,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import jmr.home.comm.rmi.RMIMessageConsumer;
-import p110.ProgressBarTab;
-import p110.UpdatingControls;
+import jmr.home.app.uirap.ProgressBarTab;
+import jmr.home.app.uirap.UpdatingControls;
 
 public class HomeEntryPoint extends AbstractEntryPoint {
 

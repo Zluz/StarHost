@@ -71,6 +71,7 @@ public class HttpAtomConsumer {
     
     public static void main( final String[] args ) {
 		final HttpAtomConsumer server = new HttpAtomConsumer( 8090, "/test" );
+		server.toString();
 		for (;;);
 	}
 }

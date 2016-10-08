@@ -1,4 +1,4 @@
-package p110;
+package jmr.home.app.uirap;
 
 import org.eclipse.rap.rwt.application.AbstractEntryPoint;
 import org.eclipse.rap.rwt.service.ServerPushSession;
