@@ -44,9 +44,9 @@ public class HttpAtomConsumer {
 			final String strURI = exchange.getRequestURI().toString();
 
 			final String strMessage = uri.getQuery();
-			
-			UserInterfaceRemote.processMessage( strMessage );
-			
+
+//			UserInterfaceRemote.processMessage( strMessage );
+			UserInterfaceRemote.updateLines( strMessage );
 			
 			final String strResponse = 
 					Integer.toString( strURI.getBytes().length ) 

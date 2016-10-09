@@ -1,17 +1,26 @@
 package jmr.home.rap;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Map.Entry;
 
 import org.eclipse.rap.rwt.service.ServerPushSession;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+
+//import jmr.util.Util;
 
 //import jmr.home.model.Atom;
 //import jmr.home.model.IAtomConsumer;
@@ -137,6 +146,57 @@ public class UserInterfaceRemote
 	}
 	
 	
+//	protected final static Map<String,String> mapLines = new HashMap<>();
+	
+//	private final static String KEY_NAME = "KEY_NAME";
+//	private final static String KEY_VALUE= "KEY_VALUE";
+	
+	final static String[] arrLines = new String[MAX_LINES];
+	final static String[] arrValues = new String[MAX_LINES];
+	final static String[] arrNewValue = new String[MAX_LINES];
+	
+	
+	public static void updateLines(	final String strMessage ) {
+		
+		int iUpdatedCount = 0;
+
+//		final Map<String, String> map = Util.extractParameters( strMessage );
+		final Map<String, String> map = extractParameters( strMessage );
+		
+		for ( final Entry<String, String> entry : map.entrySet() ) {
+			
+			final String strField = entry.getKey();
+			final String strValue = entry.getValue();
+			
+
+			Integer iLine = null;
+			
+			for ( int i=0; ( i<MAX_LINES && null==iLine ); i++ ) {
+				if ( null==arrLines[i] ) {
+					arrLines[i] = strField;
+					arrNewValue[i] = strValue;
+					iUpdatedCount++;
+					iLine = i;
+				} else if ( arrLines[i].equals( strField ) ) {
+					if ( arrValues[i].equals( strValue ) ) {
+						// value is equal, nothing to do.
+						iLine = -1;
+					} else {
+						arrNewValue[i] = strValue;
+						iUpdatedCount++;
+						iLine = i;
+					}
+				}
+			}
+		}
+		
+		for ( UserInterfaceRemote client : listInstances ) {
+			client.strPendingMessage = 
+//					"Field updated: " + strField + " = " + strValue;
+					"" + iUpdatedCount + " fields updated.";
+		}
+	}
+	
 	
 //	public void setTime( final String strTime ) {
 //		if ( null==display ) return;
@@ -196,18 +256,10 @@ public class UserInterfaceRemote
 					
 					if ( null!=strPendingMessage ) {
 	
-						display.syncExec( new Runnable() {
-							@Override
-							public void run() {
-	//							System.out.println( "[send] time update" );
-								
-								lblText.setText( strPendingMessage );
-								strPendingMessage = null;
-								lNow[0] = System.currentTimeMillis();
-							}
-						});
+						display.syncExec( runnable );
 						
-						lControlsLastUpdate = lNow[0];
+//						lControlsLastUpdate = lNow[0];
+						lControlsLastUpdate = System.currentTimeMillis();
 					}
 				}
 			}
@@ -217,6 +269,32 @@ public class UserInterfaceRemote
 		
 		timer.scheduleAtFixedRate( task, 2000, 10 );
 	}
+
+	Runnable runnable = new Runnable() {
+		@Override
+		public void run() {
+			
+			lblText.setText( strPendingMessage );
+			
+			for ( int i=0; i<MAX_LINES; i++ ) {
+				final Label lbl = arrLabels[i];
+				if ( null!=arrNewValue[i] && null!=arrLines[i] && null!=lbl ) {
+//					if ( !arrLines[i].equals( lbl.getText() ) ) {
+//						lbl.setText( arrLines[i] );
+//					}
+					final String strText = " " + arrLines[i] + " = " + arrNewValue[i];
+					lbl.setText( strText );
+					
+					arrValues[i] = arrNewValue[i];
+					arrNewValue[i] = null;
+				}
+			}
+			
+			strPendingMessage = null;
+//			lNow[0] = System.currentTimeMillis();
+		}
+	};
+
 	
 	
 	private void startTimerTaskTimeThread() {
@@ -266,5 +344,32 @@ public class UserInterfaceRemote
 		}
 	}
 
+	
+	// should be API..util. 
+	// java.lang.NoClassDefFoundError: jmr/util/Util
+
+	final public static String UTF8 = StandardCharsets.UTF_8.name();
+		
+	public static Map<String,String> extractParameters( final String query ) {
+	    final Map<String, String> map = new LinkedHashMap<String, String>();
+	    if ( null!=query && !query.isEmpty() ) {
+		    final String[] pairs = query.split( "&" );
+		    for ( final String pair : pairs ) {
+		        final int idx = pair.indexOf( "=" );
+		        try {
+					final String strKey = URLDecoder.decode( pair.substring(0, idx), UTF8 );
+					final String strValue = URLDecoder.decode( pair.substring(idx + 1), UTF8 );
+					map.put( strKey, strValue );
+				} catch ( final UnsupportedEncodingException e ) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		    }
+	    }
+	    return map;
+	}
+	
+	
+	
 
 }

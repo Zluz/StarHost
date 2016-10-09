@@ -18,6 +18,9 @@ import org.eclipse.swt.widgets.Text;
 
 public class UserInterface {
 
+	public static final int MAX_LINES = 20;
+
+
 	static {
 		System.out.println( UserInterface.class.toString() + " loaded." );
 	}
@@ -27,6 +30,10 @@ public class UserInterface {
 	protected Label lblTime;
 	protected Text txtInfo;
 	protected Label lblText;
+	
+//	final protected Map<String,Label> mapLabels = new HashMap<>();
+	final protected Label[] arrLabels = new Label[MAX_LINES];
+	
 
 
 	
@@ -241,12 +248,25 @@ public class UserInterface {
 //        compCenter.setBackground( colorBack );
         
         final Composite compRight = new Composite( parent, SWT.NONE );
-        compRight.setLayout( gl() );
+        compRight.setLayout( new GridLayout() );
         final GridData gdRight = gdFill();
         gdRight.grabExcessVerticalSpace = true;
         gdRight.horizontalSpan = 2;
         compRight.setLayoutData( gdRight );
         compRight.setBackground( colorBack );
+        
+        final GridData gdFillWide = gdFill(); // new GridData( SWT.FILL, SWT.FILL, true, false );
+        gdFillWide.grabExcessHorizontalSpace = true;
+        for ( int i=0; i<MAX_LINES; i++ ) {
+        	final Label label = new Label( compRight, SWT.NONE );
+        	label.setLayoutData( gdFillWide );
+        	label.setText( "(" + i + ")" );
+        	label.setBackground( colorButton );
+        	label.setForeground( colorFore );
+
+//        	this.mapLabels.put( " " + i, label );
+        	this.arrLabels[i] = label;
+        }
         
         final String strImageFile = "C:\\Development\\workspaces\\20160807_Eclipse_4.6\\20160820 - Star\\files\\Spotify__Album.bmp";
         final Image imgAlbum = new Image( display, strImageFile );
