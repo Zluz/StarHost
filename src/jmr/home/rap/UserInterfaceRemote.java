@@ -10,15 +10,21 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Map.Entry;
 
 import org.eclipse.rap.rwt.service.ServerPushSession;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+
+import jmr.home.comm.http.HttpSendEvent;
+import jmr.home.comm.http.HttpSendEvent.Type;
+import jmr.util.Util;
 
 //import jmr.util.Util;
 
@@ -133,7 +139,7 @@ public class UserInterfaceRemote
 		
 		final String strText = strLog;
 		for ( final UserInterfaceRemote uir : listInstances ) {
-			if ( null!=uir.display ) {
+			if ( null!=uir.display && !uir.display.isDisposed() ) {
 				uir.display.syncExec( new Runnable() {
 					@Override
 					public void run() {
@@ -166,7 +172,22 @@ public class UserInterfaceRemote
 		for ( final Entry<String, String> entry : map.entrySet() ) {
 			
 			final String strField = entry.getKey();
-			final String strValue = entry.getValue();
+			String strValue = entry.getValue();
+			
+			
+			if ( strField.contains( "Time" ) ) {
+				try {
+					long lValue = Long.parseLong( strValue );
+					// 86400000 ms in a day
+					if ( lValue < 90000000 ) {
+						lValue = lValue + Util.getMillisecondsToLastMidnight();
+					}
+//					final Date dateValue = new Date( lValue );
+					strValue = Util.getFormattedDatetime( lValue );
+				} catch ( final NumberFormatException e ) {
+					// just don't change
+				}
+			}
 			
 
 			Integer iLine = null;
@@ -190,10 +211,12 @@ public class UserInterfaceRemote
 			}
 		}
 		
-		for ( UserInterfaceRemote client : listInstances ) {
-			client.strPendingMessage = 
-//					"Field updated: " + strField + " = " + strValue;
-					"" + iUpdatedCount + " fields updated.";
+		if ( iUpdatedCount>0 ) {
+			for ( UserInterfaceRemote client : listInstances ) {
+				client.strPendingMessage = 
+	//					"Field updated: " + strField + " = " + strValue;
+						"" + iUpdatedCount + " fields updated.";
+			}
 		}
 	}
 	
@@ -215,6 +238,61 @@ public class UserInterfaceRemote
 	public void buildUI( final Composite parent ) {
 		super.buildUI( parent, true );
 		
+//		for ( final Label label : super.arrLabels ) {
+		for ( int i=0; i<MAX_LINES; i++ ) {
+			final int iIndex = i;
+			final Button label = super.arrLabels[i];
+//			label.addTouchListener( new TouchListener() {
+			label.addSelectionListener( new SelectionAdapter() {
+				private static final long serialVersionUID = 1L;
+				@Override
+//				public void touch( final TouchEvent e ) {
+				public void widgetSelected( final SelectionEvent e ) {
+					
+					label.setBackground( colorCyan );
+					
+					final String strText = label.getText();
+					final String strMessage = "Label " + iIndex + " clicked  "
+							+ "(\"" + strText + "\")";
+					System.out.println( strMessage );
+					
+					new Thread() {
+						@Override
+						public void run() {
+							try {
+								HttpSendEvent.get().send( Type.CLICK, ""+iIndex, strText );
+								Thread.sleep( 100 );
+								strPendingMessage = strText;
+							} catch ( final InterruptedException e ) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}.start();
+				}
+			});
+		}
+		
+		super.arrLabels[10].setText( "Garage-Left:  [ Open ]" );
+		super.arrLabels[11].setText( "Garage-Middle:  [ Partial ]" );
+		super.arrLabels[12].setText( "Garage-Right:  [ Closed ]" );
+
+		super.btnPlayPause.addSelectionListener( new SelectionAdapter() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public void widgetSelected( final SelectionEvent e ) {
+				System.out.println( "Play/Pause button clicked" );
+			}
+		});
+
+		super.btnNextTrack.addSelectionListener( new SelectionAdapter() {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public void widgetSelected( final SelectionEvent e ) {
+				System.out.println( "Next-Track button clicked" );
+			}
+		});
+		
 		spsClock.start();
 		startTimerTaskTimeThread();
 		
@@ -222,6 +300,8 @@ public class UserInterfaceRemote
 		startControlUpdateThread();
 		
 		this.lblText.setText( "Class: " + UserInterfaceRemote.class.getName() );
+		
+		
 	}
 
 	
@@ -277,17 +357,18 @@ public class UserInterfaceRemote
 			lblText.setText( strPendingMessage );
 			
 			for ( int i=0; i<MAX_LINES; i++ ) {
-				final Label lbl = arrLabels[i];
+				final Button lbl = arrLabels[i];
 				if ( null!=arrNewValue[i] && null!=arrLines[i] && null!=lbl ) {
 //					if ( !arrLines[i].equals( lbl.getText() ) ) {
 //						lbl.setText( arrLines[i] );
 //					}
 					final String strText = " " + arrLines[i] + " = " + arrNewValue[i];
 					lbl.setText( strText );
-					
+
 					arrValues[i] = arrNewValue[i];
 					arrNewValue[i] = null;
 				}
+				lbl.setBackground( colorBtnFace );
 			}
 			
 			strPendingMessage = null;
@@ -321,7 +402,8 @@ public class UserInterfaceRemote
 		final long lElapsed = lNowCheck - lClockLastUpdate;
 		
 //		if ( lElapsed >= PERIOD ) {
-		if ( lElapsed >= MAX_ALLOWABLE_DELAY ) {
+		if ( ( lElapsed >= MAX_ALLOWABLE_DELAY ) 
+						&& ( !display.isDisposed() ) ) {
 		
 			final Long[] lNowUI = { null };
 			
@@ -371,5 +453,11 @@ public class UserInterfaceRemote
 	
 	
 	
+	
+	@Override
+	protected void finalize() throws Throwable {
+		spsClock.stop();
+		spsControls.stop();
+	}
 
 }

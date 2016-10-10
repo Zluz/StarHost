@@ -42,6 +42,9 @@ public class HttpAtomConsumer {
 //			final InetAddress addrRemote = exchange.getRemoteAddress().getAddress();
 			final URI uri = exchange.getRequestURI();
 			final String strURI = exchange.getRequestURI().toString();
+			
+			final String strHost = exchange.getRemoteAddress().getAddress().getHostAddress();
+			HttpSendEvent.get().setHost( strHost );
 
 			final String strMessage = uri.getQuery();
 
@@ -63,7 +66,8 @@ public class HttpAtomConsumer {
                 
         	} catch ( final IOException e ) {
         		//TODO handle this
-        		e.printStackTrace();
+        		// ignore for now
+//        		e.printStackTrace();
         	}
         }
     }

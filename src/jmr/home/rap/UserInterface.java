@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Text;
 
 public class UserInterface {
 
-	public static final int MAX_LINES = 20;
+	public static final int MAX_LINES = 14;
 
 
 	static {
@@ -32,8 +32,24 @@ public class UserInterface {
 	protected Label lblText;
 	
 //	final protected Map<String,Label> mapLabels = new HashMap<>();
-	final protected Label[] arrLabels = new Label[MAX_LINES];
+	final protected Button[] arrLabels = new Button[MAX_LINES];
+	protected Button btnPlayPause;
+	protected Button btnNextTrack;
 	
+
+//    Color colorBlack;
+    Color colorWhite;
+    Color colorCyan;
+    Color colorGray;
+
+//    Color colorBack;
+    Color colorBorder;
+    Color colorButton;
+    Color colorFore;
+
+    Color colorBtnFace;
+    Color colorBtnText;
+    Color colorPageBack;
 
 
 	
@@ -115,6 +131,23 @@ public class UserInterface {
 		parent.setLayout( gl() );
 		parent.setLayoutData( gdFill() );
 
+		
+
+//	    colorBlack = display.getSystemColor( SWT.COLOR_BLACK );
+	    colorWhite = display.getSystemColor( SWT.COLOR_WHITE );
+	    colorCyan = display.getSystemColor( SWT.COLOR_CYAN );
+	    colorGray = display.getSystemColor( SWT.COLOR_GRAY );
+
+//	    colorBack = display.getSystemColor( SWT.COLOR_BLACK );
+	    colorBorder = display.getSystemColor( SWT.COLOR_DARK_GRAY );
+	    colorButton = display.getSystemColor( SWT.COLOR_DARK_BLUE );
+	    colorFore = display.getSystemColor( SWT.COLOR_GRAY );
+
+	    colorBtnFace = new Color( display, 50, 50, 50 );
+	    colorBtnText = new Color( display, 200, 200, 200 );
+	    colorPageBack = display.getSystemColor( SWT.COLOR_BLACK );
+
+		
 //		final CTabFolder folder = new CTabFolder( parent, SWT.RIGHT );
 //		folder.setLayoutData( gdFill() );
 //		
@@ -153,12 +186,7 @@ public class UserInterface {
 //        final int iParentWidth = parent.getClientArea().width;
         final int iParentWidth = parent.getBounds().width;
 //        final int iParentHeight = parent.getClientArea().height;
-        
-        final Color colorBack = display.getSystemColor( SWT.COLOR_BLACK );
-        final Color colorBorder = display.getSystemColor( SWT.COLOR_DARK_GRAY );
-        final Color colorButton = display.getSystemColor( SWT.COLOR_DARK_BLUE );
-        final Color colorFore = display.getSystemColor( SWT.COLOR_GRAY );
-        
+
         final FontData fd = parent.getFont().getFontData()[0];
         final int iOrigHeight = fd.getHeight();
         
@@ -177,13 +205,13 @@ public class UserInterface {
         gdLeft.horizontalSpan = 3;
         compLeft.setLayout( glSingle );
         compLeft.setLayoutData( gdLeft );
-        compLeft.setBackground( colorBack );
+        compLeft.setBackground( colorPageBack );
         
         
         final Composite compLeftTop = new Composite( compLeft, SWT.NONE );
         compLeftTop.setLayoutData( gdFill() );
         compLeftTop.setLayout( glSingle );
-        compLeftTop.setBackground( colorBack );
+        compLeftTop.setBackground( colorPageBack );
         
 //        SimpleDateFormat sdf = 
 ////        		new SimpleDateFormat ("E yyyy-MM-dd 'at' hh:mm:ss a zzz");
@@ -198,7 +226,7 @@ public class UserInterface {
         lblTime.setLayoutData( gdFill() );
         lblTime.setFont( fontHuge );
         lblTime.setAlignment( SWT.CENTER );
-        lblTime.setBackground( colorBack );
+        lblTime.setBackground( colorPageBack );
         lblTime.setForeground( colorFore );
         
         final Composite compLeftMiddle = new Composite( compLeft, SWT.NONE );
@@ -206,7 +234,7 @@ public class UserInterface {
         gdLeftMiddle.grabExcessVerticalSpace = true;
         compLeftMiddle.setLayoutData( gdLeftMiddle );
         compLeftMiddle.setLayout( glSingle );
-        compLeftMiddle.setBackground( colorBack );
+        compLeftMiddle.setBackground( colorPageBack );
 
         final GridLayout glButtons = gl();
         glButtons.makeColumnsEqualWidth = true;
@@ -214,29 +242,33 @@ public class UserInterface {
         final Composite compLeftBottom = new Composite( compLeft, SWT.NONE );
         compLeftBottom.setLayoutData( gdFill() );
         compLeftBottom.setLayout( glButtons );
-        compLeftBottom.setBackground( colorBack );
+        compLeftBottom.setBackground( colorPageBack );
         
         final Composite compLBL = new Composite( compLeftBottom, SWT.NONE );
         final GridData gdLBL = gdFill();
         gdLBL.horizontalSpan = 2;
 		compLBL.setLayoutData( gdLBL );
         compLBL.setLayout( glButton );
-        compLBL.setBackground( colorButton );
-        final Button btnPlayPause = new Button( compLBL, SWT.PUSH );
+        compLBL.setBackground( colorPageBack );
+        btnPlayPause = new Button( compLBL, SWT.PUSH );
         btnPlayPause.setText( "Play/Pause" );
         btnPlayPause.setLayoutData( gdFill() );
         btnPlayPause.setFont( fontBig );
+        btnPlayPause.setBackground( colorBtnFace );
+        btnPlayPause.setForeground( colorBtnText );
 
         final Composite compLBR = new Composite( compLeftBottom, SWT.NONE );
         final GridData gdLBR = gdFill();
         gdLBR.horizontalSpan = 3;
         compLBR.setLayoutData( gdLBR );
         compLBR.setLayout( glButton );
-        compLBR.setBackground( colorButton );
-        final Button btnNextTrack = new Button( compLBR, SWT.PUSH );
+        compLBR.setBackground( colorPageBack );
+        btnNextTrack = new Button( compLBR, SWT.PUSH );
         btnNextTrack.setText( "Next Track" );
         btnNextTrack.setLayoutData( gdFill() );
         btnNextTrack.setFont( fontBig );
+        btnNextTrack.setBackground( colorBtnFace );
+        btnNextTrack.setForeground( colorBtnText );
 
 
         final Composite compCenter = new Composite( parent, SWT.NONE );
@@ -245,7 +277,7 @@ public class UserInterface {
         gdCenter.grabExcessVerticalSpace = true;
         gdCenter.horizontalSpan = 2;
         compCenter.setLayoutData( gdCenter );
-//        compCenter.setBackground( colorBack );
+        compCenter.setBackground( colorPageBack );
         
         final Composite compRight = new Composite( parent, SWT.NONE );
         compRight.setLayout( new GridLayout() );
@@ -253,21 +285,26 @@ public class UserInterface {
         gdRight.grabExcessVerticalSpace = true;
         gdRight.horizontalSpan = 2;
         compRight.setLayoutData( gdRight );
-        compRight.setBackground( colorBack );
+        compRight.setBackground( colorPageBack );
         
         final GridData gdFillWide = gdFill(); // new GridData( SWT.FILL, SWT.FILL, true, false );
         gdFillWide.grabExcessHorizontalSpace = true;
         for ( int i=0; i<MAX_LINES; i++ ) {
-        	final Label label = new Label( compRight, SWT.NONE );
+        	final Button label = new Button( compRight, SWT.NONE );
         	label.setLayoutData( gdFillWide );
         	label.setText( "(" + i + ")" );
-        	label.setBackground( colorButton );
-        	label.setForeground( colorFore );
+        	label.setBackground( colorBtnFace );
+        	label.setForeground( colorBtnText );
+        	label.setAlignment( SWT.LEFT );
 
 //        	this.mapLabels.put( " " + i, label );
         	this.arrLabels[i] = label;
         }
-        
+    	final Label labelLast = new Label( compRight, SWT.NONE );
+    	labelLast.setLayoutData( gdFillWide );
+    	labelLast.setVisible( false );
+    	labelLast.setBackground( compRight.getBackground() );
+
         final String strImageFile = "C:\\Development\\workspaces\\20160807_Eclipse_4.6\\20160820 - Star\\files\\Spotify__Album.bmp";
         final Image imgAlbum = new Image( display, strImageFile );
 //        final int iWidth = imgAlbum.getImageData().width;
@@ -367,6 +404,8 @@ public class UserInterface {
 //		gdFill.grabExcessHorizontalSpace = true;
 //		gdFill.grabExcessVerticalSpace = true;
 		txtInfo.setLayoutData( gdFill );
+		txtInfo.setBackground( colorPageBack );
+		txtInfo.setForeground( colorBtnFace );
 	}
 	
 	
